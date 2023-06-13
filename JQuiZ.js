@@ -1,5 +1,6 @@
 let correctCount = 0;
 let questionCount = 0;
+let sequenceAnswering = [];
 
     // Use of Async/Await to Retrieve Data from API.
 async function dataRetrieval(url) {
@@ -51,9 +52,11 @@ function buttonHandler(event) {
 
   if (name === "correct") {
     event.target.classList.add("correct"); // Adds the CSS class "correct" to the button element.
+    sequenceAnswering.push(1);
     correctCount++;
   } else {
     event.target.classList.add("incorrect");
+    sequenceAnswering.push(0);
   }
 
   console.log(value);
@@ -68,6 +71,12 @@ function buttonHandler(event) {
   }
 }
 
+function downloadPDF() {
+  let pdf = new jsPDF("landscape", "mm", "a4");
+  pdf.text("Hello World", 10, 10);
+  pdf.save('report.pdf');
+}
+
 function showScore() {  // Use of DOM Manipulation to Display Final Score.
   const mainContent = document.getElementById("main-content");
   mainContent.innerHTML = ""; 
@@ -79,6 +88,41 @@ function showScore() {  // Use of DOM Manipulation to Display Final Score.
   const scoreText = document.createElement("p");
   scoreText.textContent = "Your Score: " + correctCount + " out of 10";
   mainContent.appendChild(scoreText);
+
+  const chartContainer = document.createElement("div");
+  chartContainer.id = "chart-container";
+  mainContent.appendChild(chartContainer);
+
+  const canvas = document.createElement("canvas");
+  canvas.id = "chart";
+  chartContainer.appendChild(canvas);
+
+  const button = document.createElement("button");
+  button.textContent = "Download Report";
+  button.addEventListener("click", downloadPDF);
+  mainContent.appendChild(button);
+
+  const data = {
+
+    labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'],
+    datasets: [{
+        label: "QU'Z Report",
+        data: sequenceAnswering,
+        borderWidth: 2,
+        pointBorderColor: 'rgba(255, 255, 255, 1)',
+    }]
+    };
+
+    const config = {
+    type: 'line',
+    data: data,
+    options: {
+        responsive: true,
+    }
+    };
+
+    const ctx = document.getElementById('chart').getContext('2d');
+    new Chart(ctx, config);
 }
 
 renderQuestion(); // Use of Function Call to Render Questions to the Page.
